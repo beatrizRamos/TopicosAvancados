@@ -23,7 +23,7 @@ public class Main {
     private static BankService service = ServiceFactory.getService();
 
     public static void main(String[] args) {
-        getEmailsClientesContasConjuntas();
+        imprimirPaisClienteMaisRico();
         //TODO to test here
     }
 
@@ -39,7 +39,6 @@ public class Main {
                 .distinct()
                 .forEach(System.out::println);
 
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -47,7 +46,30 @@ public class Main {
      * ex: Victor Lira - 352
      */
     public static void imprimirMediaSaldos() {
-  
+        service
+                .listClients()
+                .stream()
+                .forEach(client -> {
+                    double media
+                            = service.listAccounts()
+                                    .stream()
+                                    .filter(account -> account.getClient().getName().equals(client.getName()))
+                                    .mapToDouble(account -> account.getBalance())
+                                    .average().getAsDouble();
+                    System.out.println(client.getName() + " - " + media);
+                });
+
+        service
+                .listClients()
+                .stream()
+                .map(client -> client.getName() + " - " + service.listAccounts()
+                .stream()
+                .filter(account -> account.getClient().getName().equals(client.getName()))
+                .mapToDouble(account -> account.getBalance())
+                .average().getAsDouble()
+                )
+                .forEach(System.out::println);
+
     }
 
     /**
@@ -56,7 +78,34 @@ public class Main {
      * maior saldo somando todas as suas contas.
      */
     public static void imprimirPaisClienteMaisRico() {
-        
+        service
+                .listClients()
+                .stream()
+                .forEach((Client client) -> {
+                    double sumBrazil = 0.0;
+                    double sumAccounts = service.listAccounts()
+                            .stream()
+                            .filter(account -> account.getClient().getAddress().getCountry().equals("Brazil"))
+                            .filter(account -> account.getClient().getName().equals(client.getName()))
+                            .collect(Collectors.summarizingDouble(Account::getBalance)).getSum();
+                    sumBrazil = Double.compare(sumAccounts, sumBrazil);
+
+                    double sumEUA = 0.0;
+                    double sumAccountsEUA = service.listAccounts()
+                            .stream()
+                            .filter(account -> account.getClient().getAddress().getCountry().equals("United States"))
+                            .filter(account -> account.getClient().getName().equals(client.getName()))
+                            .collect(Collectors.summarizingDouble(Account::getBalance)).getSum();
+                    sumEUA = Double.compare(sumAccountsEUA, sumEUA);
+                    if(sumEUA > sumBrazil){
+                        System.out.println("Brazil");
+                    }
+                    else{
+                        System.out.println("EUA");
+                    }
+                });
+               
+               
     }
 
     /**
@@ -73,7 +122,6 @@ public class Main {
                 .average().getAsDouble();
         System.out.println(saldoMedio);
 
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -88,7 +136,6 @@ public class Main {
                 .distinct()
                 .collect(Collectors.toList());
         names.forEach(System.out::println);
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -99,13 +146,11 @@ public class Main {
      * da agência
      */
     public static List<String> getEstadoClientes(int agency) {
-        List<String> state = service.listAccounts()
+        return service.listAccounts()
                 .stream()
                 .filter(accounts -> accounts.getAgency() == agency)
                 .map(accounts -> accounts.getClient().getAddress().getState())
                 .collect(Collectors.toList());
-        return state;
-        // throw new UnsupportedOperationException();
     }
 
     /**
@@ -234,7 +279,7 @@ public class Main {
      * contas conjuntas
      */
     public static String[] getEmailsClientesContasConjuntas() {
-        List <String> emails = service.listAccounts()
+        List<String> emails = service.listAccounts()
                 .stream()
                 .filter(accounts -> accounts.getType() == AccountEnum.JOINT)
                 .map(accounts -> accounts.getClient().getEmail())
@@ -251,7 +296,7 @@ public class Main {
      * @return Retorna se o número é primo ou não
      */
     public static boolean isPrimo(int number) {
-        return IntStream.rangeClosed(2, number / 2).noneMatch(i -> number % i == 0);
+        return IntStream.rangeClosed(2, number / 2).noneMatch(i -> number % i == 0);  
     }
 
     /**
@@ -262,5 +307,6 @@ public class Main {
      */
     public static int getFatorial(int number) {
         return IntStream.rangeClosed(2, number).reduce(1, (x, y) -> x * y);
+
     }
 }
