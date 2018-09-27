@@ -1,9 +1,12 @@
 package src.br.ifpe.presentation;
 
+import static com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type.Int;
 import java.util.List;
+import java.util.OptionalDouble;
 import java.util.stream.Collectors;
 
 import src.br.ifpe.entities.Account;
+import src.br.ifpe.entities.AccountEnum;
 import src.br.ifpe.entities.Client;
 import src.br.ifpe.service.BankService;
 import src.br.ifpe.service.ServiceFactory;
@@ -21,7 +24,7 @@ public class Main {
     private static BankService service = ServiceFactory.getService();
 
     public static void main(String[] args) {
-        imprimirClientesComPoupanca();
+        getEmailsClientesContasConjuntas();
         //TODO to test here
     }
 
@@ -54,6 +57,7 @@ public class Main {
      * maior saldo somando todas as suas contas.
      */
     public static void imprimirPaisClienteMaisRico() {
+        
         throw new UnsupportedOperationException();
     }
 
@@ -63,6 +67,14 @@ public class Main {
      * @param agency
      */
     public static void imprimirSaldoMedio(int agency) {
+        double saldoMedio = service
+                .listAccounts()
+                .stream()
+                .filter(account -> account.getAgency() == agency)
+                .mapToDouble(account -> account.getBalance())
+                .sum();
+        System.out.println(saldoMedio);
+
         throw new UnsupportedOperationException();
     }
 
@@ -71,12 +83,13 @@ public class Main {
      * (tipo SAVING)
      */
     public static void imprimirClientesComPoupanca() {
-        List  names = service.listClients().stream()
-                .filter(cliente -> cliente.getAccounts().equals("SAVING"))
-                .map(cliente -> cliente.getName())
+       List <String> names = service.listAccounts()
+                .stream()
+                .filter(accounts -> accounts.getType() == AccountEnum.SAVING)
+                .map(accounts -> accounts.getClient().getName())
+                .distinct()
                 .collect(Collectors.toList());
-       names.forEach(System.out::println);
-
+        names.forEach(System.out::println);
         throw new UnsupportedOperationException();
     }
 
@@ -88,7 +101,13 @@ public class Main {
      * da agência
      */
     public static List<String> getEstadoClientes(int agency) {
-        throw new UnsupportedOperationException();
+        List <String> state = service.listAccounts()
+                .stream()
+                .filter(accounts -> accounts.getAgency() == agency)
+                .map(accounts -> accounts.getClient().getAddress().getState())
+                .collect(Collectors.toList());
+                return state;
+       // throw new UnsupportedOperationException();
     }
 
     /**
@@ -99,7 +118,15 @@ public class Main {
      * país
      */
     public static int[] getNumerosContas(String country) {
-        throw new UnsupportedOperationException();
+        int [] numbersAccounts = service.listAccounts()
+                .stream()
+                .filter(accounts -> accounts.getClient().getAddress().getCountry().equals(country))
+                .mapToInt(accounts -> accounts.getNumber())
+                .toArray();
+        
+        return numbersAccounts;
+
+       // throw new UnsupportedOperationException();
     }
 
     /**
@@ -109,7 +136,13 @@ public class Main {
      * @return
      */
     public static double getMaiorSaldo(String clientEmail) {
-        throw new UnsupportedOperationException();
+        double sumBalance = service.listAccounts()
+                .stream()
+                .filter(accounts -> accounts.getClient().getEmail().equals(clientEmail))
+                .mapToDouble(accounts -> accounts.getBalance())
+                .sum();
+        return sumBalance;
+        //throw new UnsupportedOperationException();
     }
 
     /**
@@ -154,7 +187,13 @@ public class Main {
      * clientes
      */
     public static List<Account> getContasConjuntas(List<Client> clients) {
-        throw new UnsupportedOperationException();
+         List <Account> accounts = service.listAccounts()
+                .stream()
+                .filter(account -> account.getType() == AccountEnum.JOINT)
+                .collect(Collectors.toList());
+        return accounts;
+       // throw new UnsupportedOperationException;
+       
     }
 
     /**
@@ -165,7 +204,13 @@ public class Main {
      * do estado
      */
     public static double getSomaContasEstado(String state) {
-        throw new UnsupportedOperationException();
+        double sumBalanceState = service.listAccounts()
+                .stream()
+                .filter(accounts -> accounts.getClient().getAddress().getState().equals(state))
+                .mapToDouble(accounts -> accounts.getBalance())
+                .sum();
+        return sumBalanceState;
+        //throw new UnsupportedOperationException();
     }
 
     /**
@@ -175,6 +220,15 @@ public class Main {
      * contas conjuntas
      */
     public static String[] getEmailsClientesContasConjuntas() {
+       String [] emails =  service.listAccounts()
+                .stream()
+                .filter(accounts -> accounts.getType() == AccountEnum.JOINT)
+                .map(accounts -> accounts.getClient().getEmail())
+                .distinct()
+                .toArray();
+      
+        //return emails;
+                
         throw new UnsupportedOperationException();
     }
 
