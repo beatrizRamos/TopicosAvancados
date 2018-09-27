@@ -1,9 +1,8 @@
 package src.br.ifpe.presentation;
 
-import static com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type.Int;
 import java.util.List;
-import java.util.OptionalDouble;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import src.br.ifpe.entities.Account;
 import src.br.ifpe.entities.AccountEnum;
@@ -48,7 +47,7 @@ public class Main {
      * ex: Victor Lira - 352
      */
     public static void imprimirMediaSaldos() {
-        throw new UnsupportedOperationException();
+  
     }
 
     /**
@@ -58,7 +57,6 @@ public class Main {
      */
     public static void imprimirPaisClienteMaisRico() {
         
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -72,7 +70,7 @@ public class Main {
                 .stream()
                 .filter(account -> account.getAgency() == agency)
                 .mapToDouble(account -> account.getBalance())
-                .sum();
+                .average().getAsDouble();
         System.out.println(saldoMedio);
 
         throw new UnsupportedOperationException();
@@ -83,7 +81,7 @@ public class Main {
      * (tipo SAVING)
      */
     public static void imprimirClientesComPoupanca() {
-       List <String> names = service.listAccounts()
+        List<String> names = service.listAccounts()
                 .stream()
                 .filter(accounts -> accounts.getType() == AccountEnum.SAVING)
                 .map(accounts -> accounts.getClient().getName())
@@ -101,13 +99,13 @@ public class Main {
      * da agência
      */
     public static List<String> getEstadoClientes(int agency) {
-        List <String> state = service.listAccounts()
+        List<String> state = service.listAccounts()
                 .stream()
                 .filter(accounts -> accounts.getAgency() == agency)
                 .map(accounts -> accounts.getClient().getAddress().getState())
                 .collect(Collectors.toList());
-                return state;
-       // throw new UnsupportedOperationException();
+        return state;
+        // throw new UnsupportedOperationException();
     }
 
     /**
@@ -118,15 +116,14 @@ public class Main {
      * país
      */
     public static int[] getNumerosContas(String country) {
-        int [] numbersAccounts = service.listAccounts()
+        int[] numbersAccounts = service.listAccounts()
                 .stream()
                 .filter(accounts -> accounts.getClient().getAddress().getCountry().equals(country))
                 .mapToInt(accounts -> accounts.getNumber())
                 .toArray();
-        
         return numbersAccounts;
 
-       // throw new UnsupportedOperationException();
+        // throw new UnsupportedOperationException();
     }
 
     /**
@@ -142,7 +139,6 @@ public class Main {
                 .mapToDouble(accounts -> accounts.getBalance())
                 .sum();
         return sumBalance;
-        //throw new UnsupportedOperationException();
     }
 
     /**
@@ -154,7 +150,11 @@ public class Main {
      * @param value
      */
     public static void sacar(int agency, int number, double value) {
-        throw new UnsupportedOperationException();
+        service
+                .listAccounts()
+                .stream()
+                .filter(account -> account.getAgency() == agency && account.getNumber() == number)
+                .map(account -> account.getBalance() - value);
     }
 
     /**
@@ -164,7 +164,13 @@ public class Main {
      * @param value
      */
     public static void depositar(String country, double value) {
-        throw new UnsupportedOperationException();
+        service
+                .listAccounts()
+                .stream()
+                .filter(account -> account.getClient().getAddress().getCountry().equals(country))
+                .map(account -> account.getBalance() + value)
+                .collect(Collectors.toList());
+        //.forEach(System.out::println);
     }
 
     /**
@@ -176,7 +182,17 @@ public class Main {
      * @param value - valor da transferência
      */
     public static void transferir(int agency, int numberSource, int numberTarget, double value) {
-        throw new UnsupportedOperationException();
+        service
+                .listAccounts()
+                .stream()
+                .filter(account -> account.getAgency() == agency && account.getNumber() == numberSource)
+                .map(account -> account.getBalance() - value);
+        service
+                .listAccounts()
+                .stream()
+                .filter(account -> account.getAgency() == agency && account.getNumber() == numberTarget)
+                .map(account -> account.getBalance() + value);
+
     }
 
     /**
@@ -187,13 +203,12 @@ public class Main {
      * clientes
      */
     public static List<Account> getContasConjuntas(List<Client> clients) {
-         List <Account> accounts = service.listAccounts()
+        List<Account> accounts = service.listAccounts()
                 .stream()
                 .filter(account -> account.getType() == AccountEnum.JOINT)
                 .collect(Collectors.toList());
         return accounts;
-       // throw new UnsupportedOperationException;
-       
+
     }
 
     /**
@@ -210,7 +225,6 @@ public class Main {
                 .mapToDouble(accounts -> accounts.getBalance())
                 .sum();
         return sumBalanceState;
-        //throw new UnsupportedOperationException();
     }
 
     /**
@@ -220,16 +234,14 @@ public class Main {
      * contas conjuntas
      */
     public static String[] getEmailsClientesContasConjuntas() {
-       String [] emails =  service.listAccounts()
+        List <String> emails = service.listAccounts()
                 .stream()
                 .filter(accounts -> accounts.getType() == AccountEnum.JOINT)
                 .map(accounts -> accounts.getClient().getEmail())
                 .distinct()
-                .toArray();
-      
-        //return emails;
-                
-        throw new UnsupportedOperationException();
+                .collect(Collectors.toList());
+
+        return (String[]) emails.toArray();
     }
 
     /**
@@ -239,7 +251,7 @@ public class Main {
      * @return Retorna se o número é primo ou não
      */
     public static boolean isPrimo(int number) {
-        throw new UnsupportedOperationException();
+        return IntStream.rangeClosed(2, number / 2).noneMatch(i -> number % i == 0);
     }
 
     /**
@@ -249,6 +261,6 @@ public class Main {
      * @return Retorna o fatorial do número
      */
     public static int getFatorial(int number) {
-        throw new UnsupportedOperationException();
+        return IntStream.rangeClosed(2, number).reduce(1, (x, y) -> x * y);
     }
 }
