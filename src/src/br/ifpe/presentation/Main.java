@@ -1,5 +1,6 @@
 package src.br.ifpe.presentation;
 
+import java.time.Clock;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -23,7 +24,7 @@ public class Main {
     private static BankService service = ServiceFactory.getService();
 
     public static void main(String[] args) {
-        imprimirPaisClienteMaisRico();
+       imprimirNomesClientes();
         //TODO to test here
     }
 
@@ -58,7 +59,7 @@ public class Main {
                                     .average().getAsDouble();
                     System.out.println(client.getName() + " - " + media);
                 });
-
+        /*
         service
                 .listClients()
                 .stream()
@@ -68,7 +69,7 @@ public class Main {
                 .mapToDouble(account -> account.getBalance())
                 .average().getAsDouble()
                 )
-                .forEach(System.out::println);
+                .forEach(System.out::println);*/
 
     }
 
@@ -78,6 +79,8 @@ public class Main {
      * maior saldo somando todas as suas contas.
      */
     public static void imprimirPaisClienteMaisRico() {
+
+
         service
                 .listClients()
                 .stream()
@@ -97,15 +100,16 @@ public class Main {
                             .filter(account -> account.getClient().getName().equals(client.getName()))
                             .collect(Collectors.summarizingDouble(Account::getBalance)).getSum();
                     sumEUA = Double.compare(sumAccountsEUA, sumEUA);
-                    if(sumEUA > sumBrazil){
+                    if(sumBrazil > sumEUA){
                         System.out.println("Brazil");
                     }
+                    
                     else{
-                        System.out.println("EUA");
+                        System.out.println("United States");
                     }
+                    
                 });
-               
-               
+
     }
 
     /**
@@ -168,7 +172,7 @@ public class Main {
                 .toArray();
         return numbersAccounts;
 
-        // throw new UnsupportedOperationException();
+        
     }
 
     /**
@@ -296,7 +300,7 @@ public class Main {
      * @return Retorna se o número é primo ou não
      */
     public static boolean isPrimo(int number) {
-        return IntStream.rangeClosed(2, number / 2).noneMatch(i -> number % i == 0);  
+        return IntStream.rangeClosed(2, number / 2).noneMatch(i -> number % i == 0);
     }
 
     /**
